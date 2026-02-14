@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Human Bingo</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  color: white;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+.bingo-board {
+  display: grid;
+  grid-template-columns: repeat(5, 120px);
+  grid-template-rows: repeat(5, 120px);
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.square {
+  background: white;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+  user-select: none;
+}
+
+.square:hover {
+  transform: scale(1.05);
+}
+
+.square.active {
+  background: #ffde59;
+  color: black;
+  font-weight: bold;
+  box-shadow: 0 0 10px gold;
+}
+
+.square.free {
+  background: #4CAF50;
+  color: white;
+  font-weight: bold;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background: #ffde59;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* Confetti */
+.confetti {
+  position: fixed;
+  top: -10px;
+  width: 10px;
+  height: 10px;
+  background: red;
+  animation: fall 3s linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+  }
+}
+
+.popup {
+  position: fixed;
+  top: 40%;
+  background: white;
+  color: black;
+  padding: 20px 40px;
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎉 Human Bingo</h1>
+
+<div class="bingo-board" id="board"></div>
+
+<button onclick="resetBoard()">Reset Board</button>
+
+<div class="popup" id="popup">🎉 BINGO! Congratulations! 🎉</div>
+
+<script>
+const items = [
+"Can recite the alphabet backward",
+"Is good at puzzles",
+"Has visited a national park",
+"Is afraid of heights",
+"Is an early bird",
+"Can play a musical instrument",
+"Has never had a cavity",
+"Can change a car tire",
+"Has a twin sibling",
+"Loves spicy food",
+"Has gone skydiving",
+"Is good at drawing",
+"FREE SPACE",
+"Loves to cook",
+"Speaks more than 2 languages",
+"Can code in Python",
+"Has traveled to more than 5 countries",
+"Has never flown on an airplane",
+"Has never been on a cruise",
+"Has lived in another city",
+"Can identify 5 constellations",
+"Is left-handed",
+"Has a pet dog",
+"Prefers coffee over tea",
+"Is a vegetarian or vegan"
+];
+
+const board = document.getElementById("board");
+const popup = document.getElementById("popup");
+
+function createBoard() {
+  board.innerHTML = "";
+  items.forEach((text, index) => {
+    const square = document.createElement("div");
+    square.classList.add("square");
+    square.innerText = text;
+
+    if (text === "FREE SPACE") {
+      square.classList.add("free", "active");
+    }
+
+    square.addEventListener("click", () => {
+      if (!square.classList.contains("free")) {
+        square.classList.toggle("active");
+        checkBingo();
+      }
+    });
+
+    board.appendChild(square);
+  });
+}
+
+function resetBoard() {
+  createBoard();
+  popup.style.display = "none";
+}
+
+function checkBingo() {
+  const squares = document.querySelectorAll(".square");
+  const active = [...squares].map(s => s.classList.contains("active"));
+
+  const winPatterns = [
+    [0,1,2,3,4],
+    [5,6,7,8,9],
+    [10,11,12,13,14],
+    [15,16,17,18,19],
+    [20,21,22,23,24],
+    [0,5,10,15,20],
+    [1,6,11,16,21],
+    [2,7,12,17,22],
+    [3,8,13,18,23],
+    [4,9,14,19,24],
+    [0,6,12,18,24],
+    [4,8,12,16,20]
+  ];
+
+  for (let pattern of winPatterns) {
+    if (pattern.every(index => active[index])) {
+      showConfetti();
+      popup.style.display = "block";
+      break;
+    }
+  }
+}
+
+function showConfetti() {
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement("div");
+    confetti.classList.add("confetti");
+    confetti.style.left = Math.random() * 100 + "vw";
+    confetti.style.background = randomColor();
+    confetti.style.animationDuration = (2 + Math.random() * 3) + "s";
+    document.body.appendChild(confetti);
+
+    setTimeout(() => confetti.remove(), 3000);
+  }
+}
+
+function randomColor() {
+  const colors = ["#ff0", "#f00", "#0f0", "#00f", "#ff69b4", "#ffa500"];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+createBoard();
+</script>
+
+</body>
+</html>
