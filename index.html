@@ -12,22 +12,27 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px;
+  padding: 20px;
   color: white;
+  margin: 0;
 }
 
 h1 {
   margin-bottom: 10px;
+  text-align: center;
 }
 
+/* 🔥 Responsive Grid */
 .bingo-board {
   display: grid;
-  grid-template-columns: repeat(5, 120px);
-  grid-template-rows: repeat(5, 120px);
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  width: 95vw;
+  max-width: 500px;
   margin-top: 20px;
 }
 
+/* 🔥 Perfect Square Boxes */
 .square {
   background: white;
   color: #333;
@@ -35,12 +40,13 @@ h1 {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 8px;
-  border-radius: 12px;
+  padding: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: clamp(10px, 2.5vw, 14px);
   transition: 0.3s;
   user-select: none;
+  aspect-ratio: 1 / 1;
 }
 
 .square:hover {
@@ -77,9 +83,8 @@ button:hover {
 .confetti {
   position: fixed;
   top: -10px;
-  width: 10px;
-  height: 10px;
-  background: red;
+  width: 8px;
+  height: 8px;
   animation: fall 3s linear forwards;
 }
 
@@ -94,11 +99,14 @@ button:hover {
   top: 40%;
   background: white;
   color: black;
-  padding: 20px 40px;
+  padding: 20px;
   border-radius: 12px;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   display: none;
+  width: 80%;
+  max-width: 300px;
+  text-align: center;
 }
 </style>
 </head>
@@ -145,23 +153,17 @@ const items = [
 const board = document.getElementById("board");
 const popup = document.getElementById("popup");
 
-/* 🔀 Shuffle Function */
 function shuffleArray(array) {
   const shuffled = [...array];
-
-  // Remove FREE SPACE
   const freeIndex = shuffled.indexOf("FREE SPACE");
   shuffled.splice(freeIndex, 1);
 
-  // Fisher-Yates shuffle
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  // Insert FREE SPACE back at center
   shuffled.splice(12, 0, "FREE SPACE");
-
   return shuffled;
 }
 
@@ -224,7 +226,7 @@ function checkBingo() {
 }
 
 function showConfetti() {
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 80; i++) {
     const confetti = document.createElement("div");
     confetti.classList.add("confetti");
     confetti.style.left = Math.random() * 100 + "vw";
