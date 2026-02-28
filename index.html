@@ -6,39 +6,29 @@
 <title>Human Bingo</title>
 
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 body {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #667eea, #764ba2);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 30px;
   color: white;
-  min-height: 100vh;
 }
 
 h1 {
-  margin-bottom: 15px;
-  text-align: center;
-  font-size: 1.8rem;
+  margin-bottom: 10px;
 }
 
 .bingo-board {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, 120px);
+  grid-template-rows: repeat(5, 120px);
   gap: 8px;
-  width: 100%;
-  max-width: 500px;
+  margin-top: 20px;
 }
 
 .square {
-  aspect-ratio: 1 / 1;
   background: white;
   color: #333;
   display: flex;
@@ -48,13 +38,13 @@ h1 {
   padding: 8px;
   border-radius: 12px;
   cursor: pointer;
-  font-size: clamp(10px, 2.5vw, 14px);
-  transition: 0.2s ease;
+  font-size: 14px;
+  transition: 0.3s;
   user-select: none;
 }
 
-.square:active {
-  transform: scale(0.95);
+.square:hover {
+  transform: scale(1.05);
 }
 
 .square.active {
@@ -72,57 +62,43 @@ h1 {
 
 button {
   margin-top: 20px;
-  padding: 12px 20px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #ffde59;
   font-weight: bold;
   cursor: pointer;
-  font-size: 1rem;
-  width: 100%;
-  max-width: 200px;
 }
 
-button:active {
-  transform: scale(0.95);
+button:hover {
+  opacity: 0.9;
 }
 
-/* Popup */
-.popup {
-  position: fixed;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  color: black;
-  padding: 20px 30px;
-  border-radius: 12px;
-  font-size: 20px;
-  font-weight: bold;
-  display: none;
-  text-align: center;
-}
-
-/* Confetti */
 .confetti {
   position: fixed;
   top: -10px;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
+  background: red;
   animation: fall 3s linear forwards;
 }
 
 @keyframes fall {
   to {
-    transform: translateY(110vh) rotate(720deg);
+    transform: translateY(100vh) rotate(720deg);
   }
 }
 
-/* Smaller devices */
-@media (max-width: 400px) {
-  h1 {
-    font-size: 1.4rem;
-  }
+.popup {
+  position: fixed;
+  top: 40%;
+  background: white;
+  color: black;
+  padding: 20px 40px;
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  display: none;
 }
 </style>
 </head>
@@ -135,7 +111,7 @@ button:active {
 
 <button onclick="resetBoard()">Reset Board</button>
 
-<div class="popup" id="popup">🎉 BINGO! 🎉</div>
+<div class="popup" id="popup">🎉 BINGO! Congratulations! 🎉</div>
 
 <script>
 const items = [
@@ -169,9 +145,33 @@ const items = [
 const board = document.getElementById("board");
 const popup = document.getElementById("popup");
 
+/* 🔀 Shuffle Function */
+function shuffleArray(array) {
+  const shuffled = [...array];
+
+  // Remove FREE SPACE
+  const freeIndex = shuffled.indexOf("FREE SPACE");
+  shuffled.splice(freeIndex, 1);
+
+  // Fisher-Yates shuffle
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  // Insert FREE SPACE back at center
+  shuffled.splice(12, 0, "FREE SPACE");
+
+  return shuffled;
+}
+
 function createBoard() {
   board.innerHTML = "";
-  items.forEach((text) => {
+  popup.style.display = "none";
+
+  const shuffledItems = shuffleArray(items);
+
+  shuffledItems.forEach((text) => {
     const square = document.createElement("div");
     square.classList.add("square");
     square.innerText = text;
@@ -193,23 +193,29 @@ function createBoard() {
 
 function resetBoard() {
   createBoard();
-  popup.style.display = "none";
 }
 
 function checkBingo() {
   const squares = document.querySelectorAll(".square");
   const active = [...squares].map(s => s.classList.contains("active"));
 
-  const patterns = [
-    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],
-    [15,16,17,18,19],[20,21,22,23,24],
-    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],
-    [3,8,13,18,23],[4,9,14,19,24],
-    [0,6,12,18,24],[4,8,12,16,20]
+  const winPatterns = [
+    [0,1,2,3,4],
+    [5,6,7,8,9],
+    [10,11,12,13,14],
+    [15,16,17,18,19],
+    [20,21,22,23,24],
+    [0,5,10,15,20],
+    [1,6,11,16,21],
+    [2,7,12,17,22],
+    [3,8,13,18,23],
+    [4,9,14,19,24],
+    [0,6,12,18,24],
+    [4,8,12,16,20]
   ];
 
-  for (let pattern of patterns) {
-    if (pattern.every(i => active[i])) {
+  for (let pattern of winPatterns) {
+    if (pattern.every(index => active[index])) {
       showConfetti();
       popup.style.display = "block";
       break;
@@ -218,19 +224,20 @@ function checkBingo() {
 }
 
 function showConfetti() {
-  for (let i = 0; i < 80; i++) {
-    const c = document.createElement("div");
-    c.classList.add("confetti");
-    c.style.left = Math.random() * 100 + "vw";
-    c.style.background = randomColor();
-    c.style.animationDuration = (2 + Math.random() * 2) + "s";
-    document.body.appendChild(c);
-    setTimeout(() => c.remove(), 3000);
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement("div");
+    confetti.classList.add("confetti");
+    confetti.style.left = Math.random() * 100 + "vw";
+    confetti.style.background = randomColor();
+    confetti.style.animationDuration = (2 + Math.random() * 3) + "s";
+    document.body.appendChild(confetti);
+
+    setTimeout(() => confetti.remove(), 3000);
   }
 }
 
 function randomColor() {
-  const colors = ["#ff0","#f00","#0f0","#00f","#ff69b4","#ffa500"];
+  const colors = ["#ff0", "#f00", "#0f0", "#00f", "#ff69b4", "#ffa500"];
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
